@@ -1,10 +1,19 @@
-import { getDataProfileUser, userLogin } from "../../services/userService";
+import { Request, Response } from "express";
+import {
+  UserService
+} from "../../services/userService";
 
-export const getDataProfile = (req: any, res: any) => {
-    const resp: any = getDataProfileUser(req, res);
+export class UserController {
+  private userService: UserService;
+  constructor() {
+    this.userService = new UserService()
+  }
+  getDataProfile = (req: Request, res: Response) => {
+    const resp = this.userService.getDataProfileUser(req, res);
     return resp;
-};
-export const loginWithPassword = (req: any, res: any) => {
-    const resp: any = userLogin(req, res);
-    return resp;
-};
+  };
+
+  loginWithPassword = (req: Request, res: Response) => {
+    return this.userService.userLogin(req, res);
+  };
+}

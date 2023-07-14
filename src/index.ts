@@ -7,9 +7,11 @@ import cors from "cors";
 import { APP_CONFIG } from "./configs";
 import loadQueueBoard from "./libs/queue/bull-board";
 import { initScheduledJobs } from "./cron";
-import { getDataProfile, loginWithPassword } from "./modules/user/controller";
 import { METHOD_API } from "./constants/methodApi";
 import { authenticateJWT } from "./middleware/auth";
+import { routes } from "./configs/routes";
+import { TUserServices } from "./types/user.type";
+import { Request, Response } from "express";
 
 connectDb();
 
@@ -24,26 +26,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
 
-const routes = [
-  {
-    path: '/profile',
-    method: 'get',
-    controller: (req: Request, res: Response) => getDataProfile(req, res),
-    middleware: authenticateJWT,
-  },
-  {
-    path: '/login',
-    method: 'post',
-    controller: (req: Request, res: Response) => loginWithPassword(req, res),
-  },
-]
-
-routes.forEach((route: any) => {
+routes.forEach((route) => {
   if(route.method === METHOD_API.get) {
+    route.middleware ? 
     app.get(route.path, route.middleware, (req, res) => route.controller(req, res))
+    : app.get(route.path, (req, res) => route.controller(req, res))
   }
   if(route.method === METHOD_API.post) {
-    app.post(route.path, (req, res) => route.controller(req, res))
+    route.middleware ? 
+    app.post(route.path, route.middleware, (req, res) => route.controller(req, res))
+    : app.post(route.path, (req, res) => route.controller(req, res))
   }
 })
 
